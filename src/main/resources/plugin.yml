@@ -1,0 +1,10 @@
+name: EywaRestart
+version: 1.0.0
+main: com.eywamc.restart.EywaRestart
+api-version: '26.3'
+author: Bendemen
+description: Custom EywaMC restart countdown.
+permissions:
+  eywarestart.use:
+    description: Allows using /restart to start the EywaMC restart sequence.
+    default: op
