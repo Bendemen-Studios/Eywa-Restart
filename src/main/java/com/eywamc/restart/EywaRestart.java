@@ -12,7 +12,6 @@ import org.bukkit.scheduler.BukkitTask;
 
 public final class EywaRestart extends JavaPlugin implements Listener {
     private static final String PERMISSION = "eywarestart.use";
-    private static final String KICK_MESSAGE = "&9ʀᴇsᴛᴀʀᴛ ɢᴏɪɴɢ ᴏɴ, ʏᴏᴜ ᴄᴀɴ ᴊᴏɪɴ sᴏᴏɴ ᴀɢᴀɪɴ";
     private boolean restarting;
     private BukkitTask countdownTask;
 
@@ -78,7 +77,6 @@ public final class EywaRestart extends JavaPlugin implements Listener {
     private void performRestart() {
         getLogger().info("Executing EywaMC restart sequence...");
         dispatchConsole("save-all");
-        dispatchConsole("kickall " + KICK_MESSAGE);
         Bukkit.getServer().restart();
     }
 
