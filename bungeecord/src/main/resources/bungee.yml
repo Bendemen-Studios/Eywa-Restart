@@ -1,0 +1,5 @@
+name: EywaRestart
+main: com.eywamc.restart.bungee.EywaRestartBungee
+version: 1.0.0
+author: Bendemen
+description: Network-wide EywaMC proxy restart countdown.
