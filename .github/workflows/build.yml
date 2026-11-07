@@ -1,4 +1,4 @@
-name: Build EywaRestart
+name: Build EywaRestart (Paper + BungeeCord)
 on:
   push:
     branches: [main]
@@ -15,12 +15,19 @@ jobs:
           distribution: temurin
           java-version: '25'
           cache: maven
-      - name: Build plugin
+      - name: Build Paper plugin
         run: mvn --batch-mode clean package
-      - name: Upload JAR
+      - name: Build BungeeCord plugin
+        run: mvn --batch-mode -f bungeecord/pom.xml clean package
+      - name: Collect JARs
+        run: |
+          mkdir -p dist
+          cp target/EywaRestart-1.0.0.jar dist/
+          cp bungeecord/target/EywaRestart-BungeeCord-1.0.0.jar dist/
+      - name: Upload both plugins
         uses: actions/upload-artifact@v4
         with:
-          name: EywaRestart-1.0.0
-          path: target/EywaRestart-1.0.0.jar
+          name: EywaRestart-1.0.0-BOTH
+          path: dist/*.jar
           if-no-files-found: error
           retention-days: 30
