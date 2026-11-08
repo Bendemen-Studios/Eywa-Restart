@@ -3,6 +3,7 @@ package com.eywamc.restart.bungee;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
@@ -16,16 +17,18 @@ public final class EywaRestartBungee extends Plugin {
 
     @Override
     public void onEnable() {
+        // Check permissions ourselves so the console is never blocked by Bungee's
+        // command-level permission pre-check.
         ProxyServer.getInstance().getPluginManager().registerCommand(
                 this,
-                new Command("restart", PERMISSION) {
+                new Command("restart") {
                     @Override
                     public void execute(CommandSender sender, String[] args) {
                         startRestart(sender);
                     }
                 }
         );
-        getLogger().info("EywaRestart BungeeCord enabled.");
+        getLogger().info("EywaRestart BungeeCord enabled. Permission: " + PERMISSION);
     }
 
     @Override
@@ -36,8 +39,10 @@ public final class EywaRestartBungee extends Plugin {
     }
 
     private void startRestart(CommandSender sender) {
-        if (!sender.hasPermission(PERMISSION)) {
-            sender.sendMessage(TextComponent.fromLegacyText("§cJe hebt geen toestemming om de proxy te herstarten."));
+        if (sender instanceof ProxiedPlayer player && !player.hasPermission(PERMISSION)) {
+            player.sendMessage(TextComponent.fromLegacyText(
+                    "§cJe hebt geen toestemming. Vereiste permissie: " + PERMISSION
+            ));
             return;
         }
 
