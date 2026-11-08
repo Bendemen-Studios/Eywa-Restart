@@ -15,24 +15,32 @@ public final class EywaRestart extends JavaPlugin implements Listener {
     private boolean restarting;
     private BukkitTask countdownTask;
 
-    @Override public void onEnable() {
+    @Override
+    public void onEnable() {
         getServer().getPluginManager().registerEvents(this, this);
-        getLogger().info("EywaRestart enabled.");
+        getLogger().info("EywaRestart enabled. Permission: " + PERMISSION);
     }
 
-    @Override public void onDisable() {
-        if (countdownTask != null) countdownTask.cancel();
+    @Override
+    public void onDisable() {
+        if (countdownTask != null) {
+            countdownTask.cancel();
+        }
     }
 
-    @EventHandler public void onPlayerCommand(PlayerCommandPreprocessEvent event) {
+    @EventHandler
+    public void onPlayerCommand(PlayerCommandPreprocessEvent event) {
         String command = event.getMessage().substring(1).trim();
         if (!isRestartCommand(command)) return;
+
         event.setCancelled(true);
         handleRestart(event.getPlayer());
     }
 
-    @EventHandler public void onConsoleCommand(ServerCommandEvent event) {
+    @EventHandler
+    public void onConsoleCommand(ServerCommandEvent event) {
         if (!isRestartCommand(event.getCommand().trim())) return;
+
         event.setCancelled(true);
         handleRestart(event.getSender());
     }
@@ -45,14 +53,17 @@ public final class EywaRestart extends JavaPlugin implements Listener {
     }
 
     private void handleRestart(CommandSender sender) {
-        if (sender instanceof Player player && !player.hasPermission(PERMISSION)) {
-            player.sendMessage("§cJe hebt geen toestemming om de server te herstarten.");
+        // OPs are always allowed; other players need the explicit permission node.
+        if (sender instanceof Player player && !player.isOp() && !player.hasPermission(PERMISSION)) {
+            player.sendMessage("§cJe hebt geen toestemming. Vereiste permissie: " + PERMISSION);
             return;
         }
+
         if (restarting) {
             sender.sendMessage("§cEywaMC is al bezig met een restart.");
             return;
         }
+
         restarting = true;
         broadcastCountdown(10);
         countdownTask = Bukkit.getScheduler().runTaskLater(this, () -> {
@@ -70,8 +81,9 @@ public final class EywaRestart extends JavaPlugin implements Listener {
     private void broadcastCountdown(int seconds) {
         String message = "ap broadcast all <blue><b>EywaMC</blue> <dark_gray>|</dark_gray> <blue>Restarting <gray>in <blue>"
                 + seconds + (seconds == 10 ? " <gray>seconds" : "");
-        if (!Bukkit.dispatchCommand(Bukkit.getConsoleSender(), message))
+        if (!Bukkit.dispatchCommand(Bukkit.getConsoleSender(), message)) {
             getLogger().warning("AdvancedBroadcast command failed: " + message);
+        }
     }
 
     private void performRestart() {
@@ -81,7 +93,8 @@ public final class EywaRestart extends JavaPlugin implements Listener {
     }
 
     private void dispatchConsole(String command) {
-        if (!Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command))
+        if (!Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command)) {
             getLogger().warning("Command failed or was not found: " + command);
+        }
     }
 }
