@@ -4,6 +4,11 @@ main: com.eywamc.restart.EywaRestart
 api-version: '26.3'
 author: Bendemen
 description: Custom EywaMC restart countdown.
+commands:
+  restart:
+    description: Starts the EywaMC restart countdown.
+    permission: eywarestart.use
+    permission-message: "§cJe hebt geen toestemming. Vereiste permissie: eywarestart.use"
 permissions:
   eywarestart.use:
     description: Allows using /restart to start the EywaMC restart sequence.
