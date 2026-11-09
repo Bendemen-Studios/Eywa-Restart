@@ -89,7 +89,9 @@ public final class EywaRestart extends JavaPlugin implements Listener {
     private void performRestart() {
         getLogger().info("Executing EywaMC restart sequence...");
         dispatchConsole("save-all");
-        Bukkit.getServer().restart();
+        // Stop only this Paper server. The hosting panel/AutoPlug must restart this process.
+        // Do not call Server.restart(): it executes the configured restart script, which may target the proxy.
+        Bukkit.shutdown();
     }
 
     private void dispatchConsole(String command) {
