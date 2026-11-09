@@ -7,24 +7,45 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
+import org.bukkit.plugin.messaging.PluginMessageListener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
-public final class EywaRestart extends JavaPlugin implements Listener {
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+
+public final class EywaRestart extends JavaPlugin implements Listener, PluginMessageListener {
     private static final String PERMISSION = "eywarestart.use";
+    private static final String CHANNEL = "eywarestart:restart";
+    private static final String MESSAGE_TOKEN = "EywaMC-Paper-Restart-v1";
     private boolean restarting;
     private BukkitTask countdownTask;
 
     @Override
     public void onEnable() {
         getServer().getPluginManager().registerEvents(this, this);
+        getServer().getMessenger().registerIncomingPluginChannel(this, CHANNEL, this);
         getLogger().info("EywaRestart enabled. Permission: " + PERMISSION);
     }
 
     @Override
     public void onDisable() {
+        getServer().getMessenger().unregisterIncomingPluginChannel(this, CHANNEL, this);
         if (countdownTask != null) {
             countdownTask.cancel();
+        }
+    }
+
+    @Override
+    public void onPluginMessageReceived(String channel, Player player, byte[] message) {
+        if (!CHANNEL.equals(channel) || player == null) return;
+
+        try (DataInputStream input = new DataInputStream(new ByteArrayInputStream(message))) {
+            if (!MESSAGE_TOKEN.equals(input.readUTF())) return;
+            handleRestart(player);
+        } catch (IOException exception) {
+            getLogger().warning("Received an invalid restart request from the proxy.");
         }
     }
 
@@ -53,7 +74,6 @@ public final class EywaRestart extends JavaPlugin implements Listener {
     }
 
     private void handleRestart(CommandSender sender) {
-        // OPs are always allowed; other players need the explicit permission node.
         if (sender instanceof Player player && !player.isOp() && !player.hasPermission(PERMISSION)) {
             player.sendMessage("§cYou do not have permission. Required permission: " + PERMISSION);
             return;
@@ -90,7 +110,6 @@ public final class EywaRestart extends JavaPlugin implements Listener {
         getLogger().info("Executing EywaMC restart sequence...");
         dispatchConsole("save-all");
         // Stop only this Paper server. The hosting panel/AutoPlug must restart this process.
-        // Do not call Server.restart(): it executes the configured restart script, which may target the proxy.
         Bukkit.shutdown();
     }
 
