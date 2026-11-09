@@ -55,12 +55,12 @@ public final class EywaRestart extends JavaPlugin implements Listener {
     private void handleRestart(CommandSender sender) {
         // OPs are always allowed; other players need the explicit permission node.
         if (sender instanceof Player player && !player.isOp() && !player.hasPermission(PERMISSION)) {
-            player.sendMessage("§cJe hebt geen toestemming. Vereiste permissie: " + PERMISSION);
+            player.sendMessage("§cYou do not have permission. Required permission: " + PERMISSION);
             return;
         }
 
         if (restarting) {
-            sender.sendMessage("§cEywaMC is al bezig met een restart.");
+            sender.sendMessage("§cEywaMC is already restarting.");
             return;
         }
 
