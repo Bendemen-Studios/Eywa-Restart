@@ -41,13 +41,13 @@ public final class EywaRestartBungee extends Plugin {
     private void startRestart(CommandSender sender) {
         if (sender instanceof ProxiedPlayer player && !player.hasPermission(PERMISSION)) {
             player.sendMessage(TextComponent.fromLegacyText(
-                    "§cJe hebt geen toestemming. Vereiste permissie: " + PERMISSION
+                    "§cYou do not have permission. Required permission: " + PERMISSION
             ));
             return;
         }
 
         if (restarting) {
-            sender.sendMessage(TextComponent.fromLegacyText("§cEywaMC is al bezig met een proxy-restart."));
+            sender.sendMessage(TextComponent.fromLegacyText("§cEywaMC is already restarting the proxy."));
             return;
         }
 
@@ -80,7 +80,7 @@ public final class EywaRestartBungee extends Plugin {
     private void stopProxy() {
         getLogger().info("Stopping EywaMC BungeeCord proxy for restart.");
         ProxyServer.getInstance().broadcast(TextComponent.fromLegacyText(
-                "§9§lEywaMC §8| §7De proxy wordt opnieuw gestart. Je kunt zo weer verbinden."
+                "§9§lEywaMC §8| §7The proxy is restarting. You will be able to reconnect shortly."
         ));
         ProxyServer.getInstance().stop();
     }
