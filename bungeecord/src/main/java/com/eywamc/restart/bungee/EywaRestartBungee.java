@@ -8,44 +8,62 @@ import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 public final class EywaRestartBungee extends Plugin {
-    private static final String PERMISSION = "eywarestart.use";
+    private static final String CHANNEL = "eywarestart:restart";
+    private static final String MESSAGE_TOKEN = "EywaMC-Paper-Restart-v1";
     private boolean restarting;
     private ScheduledTask countdownTask;
 
     @Override
     public void onEnable() {
-        // Check permissions ourselves so the console is never blocked by Bungee's
-        // command-level permission pre-check.
+        ProxyServer.getInstance().registerChannel(CHANNEL);
         ProxyServer.getInstance().getPluginManager().registerCommand(
                 this,
                 new Command("restart") {
                     @Override
                     public void execute(CommandSender sender, String[] args) {
-                        startRestart(sender);
+                        // Player commands are routed to that player's current Paper server.
+                        // Only the proxy console starts a BungeeCord restart.
+                        if (sender instanceof ProxiedPlayer player) {
+                            requestPaperRestart(player);
+                        } else {
+                            startRestart(sender);
+                        }
                     }
                 }
         );
-        getLogger().info("EywaRestart BungeeCord enabled. Permission: " + PERMISSION);
+        getLogger().info("EywaRestart BungeeCord enabled.");
     }
 
     @Override
     public void onDisable() {
+        ProxyServer.getInstance().unregisterChannel(CHANNEL);
         if (countdownTask != null) {
             countdownTask.cancel();
         }
     }
 
-    private void startRestart(CommandSender sender) {
-        if (sender instanceof ProxiedPlayer player && !player.hasPermission(PERMISSION)) {
+    private void requestPaperRestart(ProxiedPlayer player) {
+        try {
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            try (DataOutputStream output = new DataOutputStream(bytes)) {
+                output.writeUTF(MESSAGE_TOKEN);
+            }
+            player.getServer().sendData(CHANNEL, bytes.toByteArray());
+        } catch (IOException exception) {
             player.sendMessage(TextComponent.fromLegacyText(
-                    "§cYou do not have permission. Required permission: " + PERMISSION
+                    "§cCould not send the restart request to your server."
             ));
-            return;
+            getLogger().warning("Could not encode Paper restart request: " + exception.getMessage());
         }
+    }
 
+    private void startRestart(CommandSender sender) {
         if (restarting) {
             sender.sendMessage(TextComponent.fromLegacyText("§cEywaMC is already restarting the proxy."));
             return;
