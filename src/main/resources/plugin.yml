@@ -8,7 +8,7 @@ commands:
   restart:
     description: Starts the EywaMC restart countdown.
     permission: eywarestart.use
-    permission-message: "§cJe hebt geen toestemming. Vereiste permissie: eywarestart.use"
+    permission-message: "§cYou do not have permission. Required permission: eywarestart.use"
 permissions:
   eywarestart.use:
     description: Allows using /restart to start the EywaMC restart sequence.
